@@ -3,11 +3,11 @@ import { WindowPanel } from "./WindowPanel";
 export class WindowBox extends React.PureComponent {
     render() {
         let { children } = this.props.boxData;
-        let { onWindowOpened, onWindowClosing } = this.props;
+        let { onOpened, onClosing, getName } = this.props;
         let childrenRender = [];
         for (let child of children) {
             if ('tabs' in child) {
-                childrenRender.push(React.createElement(WindowPanel, { key: child.id, panelData: child, onWindowOpened: onWindowOpened, onWindowClosing: onWindowClosing }));
+                childrenRender.push(React.createElement(WindowPanel, { key: child.id, panelData: child, onOpened: onOpened, onClosing: onClosing, getName: getName }));
             }
         }
         return (React.createElement(React.Fragment, null, childrenRender));

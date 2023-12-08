@@ -29,6 +29,28 @@ import * as DragManager from "./dragdrop/DragManager";
 import {MaxBox} from "./MaxBox";
 import {WindowBox} from "./WindowBox";
 
+export interface WindowProps {
+  /**
+   * Handler for when a panel is popped out as window
+   * @param panel the panel that has been popped out
+   * @param window newly created window object
+   */
+  onOpened?(panel: PanelData, window: Window): void;
+
+  /**
+   * Handler for when a popped out window is closing
+   * @param panel the panel that is popped out
+   * @param window the window object that is about to close
+   */
+  onClosing?(panel: PanelData, window: Window): void;
+
+  /**
+   * Handler for a client to provide a window name when popping out a panel into a window
+   * @param panel the panel that is about to be popped out
+   */
+  getName?(panel: PanelData): string;
+}
+
 export interface LayoutProps {
   /**
    * when there are multiple DockLayout, by default, you can't drag panel between them
@@ -59,20 +81,6 @@ export interface LayoutProps {
    * @param direction direction of the dock change
    */
   onLayoutChange?(newLayout: LayoutBase, currentTabId?: string, direction?: DropDirection): void;
-
-  /**
-   * Fired when a panel is popped out as window
-   * @param panel the panel that has been popped out
-   * @param window newly created window object
-   */
-  onWindowOpened?(panel: PanelData, window: Window): void;
-
-  /**
-   * Fired when a popped out window is closing
-   * @param panel the panel that is popped out
-   * @param window the window object that is about to close
-   */
-  onWindowClosing?(panel: PanelData, window: Window): void;
 
   /**
    * - default mode: showing 4 to 9 squares to help picking drop areas
@@ -113,6 +121,11 @@ export interface LayoutProps {
    * use dom element as the value, or use the element's id
    */
   maximizeTo?: string | HTMLElement;
+
+  /**
+   * Props specific to when a panel is popped out as a new-window
+   */
+  windowProps?: WindowProps;
 }
 
 interface LayoutState {
@@ -490,7 +503,7 @@ export class DockLayout extends DockPortalManager implements DockContext {
     // clear tempLayout
     this.tempLayout = null;
 
-    let {style, maximizeTo, onWindowOpened, onWindowClosing} = this.props;
+    let {style, maximizeTo, windowProps} = this.props;
     let {layout, dropRect} = this.state;
     let dropRectStyle: React.CSSProperties;
     if (dropRect) {
@@ -527,7 +540,7 @@ export class DockLayout extends DockPortalManager implements DockContext {
         <DockContextProvider value={this}>
           <DockBox size={1} boxData={layout.dockbox}/>
           <FloatBox boxData={layout.floatbox}/>
-          <WindowBox boxData={layout.windowbox} onWindowOpened={onWindowOpened} onWindowClosing={onWindowClosing}/>
+          <WindowBox boxData={layout.windowbox} onOpened={windowProps.onOpened} onClosing={windowProps.onClosing} getName={windowProps.getName}/>
           {maximize}
           {portals}
         </DockContextProvider>

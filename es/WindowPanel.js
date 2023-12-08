@@ -7,22 +7,22 @@ export class WindowPanel extends React.PureComponent {
     constructor() {
         super(...arguments);
         this.onOpen = (w) => {
-            let { panelData, onWindowOpened } = this.props;
+            let { panelData, onOpened } = this.props;
             if (!this._window && w) {
                 this._window = w;
-                if (onWindowOpened) {
-                    onWindowOpened(panelData, this._window);
+                if (onOpened) {
+                    onOpened(panelData, this._window);
                 }
             }
         };
         this.onUnload = () => {
-            let { panelData, onWindowClosing } = this.props;
-            if (onWindowClosing) {
-                onWindowClosing(panelData, this._window);
+            let { panelData, onClosing } = this.props;
+            if (onClosing) {
+                onClosing(panelData, this._window);
             }
             let layoutRoot = this.context.getRootElement();
             const rect = mapWindowToElement(layoutRoot, this._window);
-            if (rect.width > 0 && rect.height > 0) {
+            if (rect && rect.width > 0 && rect.height > 0) {
                 panelData.x = rect.left;
                 panelData.y = rect.top;
                 panelData.w = rect.width;
@@ -41,9 +41,13 @@ export class WindowPanel extends React.PureComponent {
         };
     }
     render() {
-        let { panelData } = this.props;
+        let { panelData, getName } = this.props;
         let { x, y, w, h } = panelData;
-        return React.createElement(NewWindow, { copyStyles: true, onOpen: this.onOpen, onClose: this.onUnload, onBlock: this.onUnload, initPopupInnerRect: this.initPopupInnerRect, width: w, height: h },
+        let name = undefined;
+        if (getName) {
+            name = getName(panelData);
+        }
+        return React.createElement(NewWindow, { name: name, copyStyles: true, onOpen: this.onOpen, onClose: this.onUnload, onBlock: this.onUnload, initPopupInnerRect: this.initPopupInnerRect, width: w, height: h },
             React.createElement("div", { className: 'dock-wbox' },
                 React.createElement(DockPanel, { size: panelData.size, panelData: panelData, key: panelData.id })));
     }

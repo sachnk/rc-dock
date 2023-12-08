@@ -7,8 +7,9 @@ import {mapElementToScreenRect, mapWindowToElement} from "rc-new-window/lib/Scre
 
 interface Props {
   panelData: PanelData;
-  onWindowOpened?(panel: PanelData, window: Window): void;
-  onWindowClosing?(panel: PanelData, window: Window): void;
+  onOpened?(panel: PanelData, window: Window): void;
+  onClosing?(panel: PanelData, window: Window): void;
+  getName?(panel: PanelData): string;
 }
 
 export class WindowPanel extends React.PureComponent<Props, any> {
@@ -18,23 +19,23 @@ export class WindowPanel extends React.PureComponent<Props, any> {
   _window: Window;
 
   onOpen = (w: Window) => {
-    let {panelData, onWindowOpened} = this.props;
+    let {panelData, onOpened} = this.props;
     if (!this._window && w) {
       this._window = w;
-      if (onWindowOpened) {
-        onWindowOpened(panelData, this._window);
+      if (onOpened) {
+        onOpened(panelData, this._window);
       }
     }
   };
   onUnload = () => {
-    let {panelData, onWindowClosing} = this.props;
-    if (onWindowClosing) {
-      onWindowClosing(panelData, this._window);
+    let {panelData, onClosing} = this.props;
+    if (onClosing) {
+      onClosing(panelData, this._window);
     }
 
     let layoutRoot = this.context.getRootElement();
     const rect = mapWindowToElement(layoutRoot, this._window);
-    if (rect.width > 0 && rect.height > 0) {
+    if (rect && rect.width > 0 && rect.height > 0) {
       panelData.x = rect.left;
       panelData.y = rect.top;
       panelData.w = rect.width;
@@ -53,13 +54,18 @@ export class WindowPanel extends React.PureComponent<Props, any> {
     }) as any;
   };
 
-
   render(): React.ReactNode {
-    let {panelData} = this.props;
+    let {panelData, getName} = this.props;
 
     let {x, y, w, h} = panelData;
 
-    return <NewWindow copyStyles={true}
+    let name = undefined;
+    if (getName) {
+      name = getName(panelData);
+    }
+
+    return <NewWindow name={name}
+                      copyStyles={true}
                       onOpen={this.onOpen}
                       onClose={this.onUnload}
                       onBlock={this.onUnload}

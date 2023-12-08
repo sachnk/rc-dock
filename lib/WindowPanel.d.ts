@@ -2,8 +2,9 @@ import * as React from "react";
 import { DockContext, PanelData } from "./DockData";
 interface Props {
     panelData: PanelData;
-    onWindowOpened?(panel: PanelData, window: Window): void;
-    onWindowClosing?(panel: PanelData, window: Window): void;
+    onOpened?(panel: PanelData, window: Window): void;
+    onClosing?(panel: PanelData, window: Window): void;
+    getName?(panel: PanelData): string;
 }
 export declare class WindowPanel extends React.PureComponent<Props, any> {
     static contextType: React.Context<DockContext>;
